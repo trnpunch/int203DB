@@ -21,3 +21,27 @@ WHERE population > (SELECT population FROM world WHERE name = 'United Kingdom')
 SELECT name , CONCAT(ROUND( population*100/ (SELECT population FROM world WHERE name= 'Germany' )) , '%')
 FROM world
 WHERE continent= 'Europe'
+
+---- 6 Which countries have a GDP greater than every country in Europe? [Give the name only.] (Some countries may have NULL gdp values)
+SELECT name FROM world  WHERE gdp >= ALL (
+  SELECT gdp FROM world WHERE continent = 'Europe' and gdp >0
+) and continent != 'Europe'
+
+---- 7 Find the largest country (by area) in each continent, show the continent, the name and the area:
+SELECT continent, name, area
+FROM (
+  SELECT continent, name, area,
+    ROW_NUMBER() OVER (PARTITION BY continent ORDER BY area DESC) as rank
+  FROM world
+  WHERE population > 0
+) ranked_world
+WHERE rank = 1
+ORDER BY name
+
+---- 8 List each continent and the name of the country that comes first alphabetically.
+SELECT continent, name
+FROM (
+  SELECT continent, name,
+    ROW_NUMBER() OVER (PARTITION BY continent ORDER BY name) as alphabetically
+  FROM world) alphabetically_world
+WHERE alphabetically = 1
