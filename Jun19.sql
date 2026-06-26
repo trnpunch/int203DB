@@ -45,3 +45,13 @@ FROM (
     ROW_NUMBER() OVER (PARTITION BY continent ORDER BY name) as alphabetically
   FROM world) alphabetically_world
 WHERE alphabetically = 1
+
+---- 9 Some countries have populations more than three times that of all of their neighbours (in the same continent). Give the countries and continents.
+SELECT name, continent
+FROM world x
+WHERE population > ALL (
+  SELECT 3 * population 
+  FROM world y 
+  WHERE x.continent = y.continent 
+    AND x.name <> y.name
+)
